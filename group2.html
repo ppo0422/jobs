@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>집단 2 · Charlie's Dreams 내용 이해</title>
+<style>
+:root{--bg:#f1f6ff;--main:#3f6fc4;--soft:#dce8fb;--ok:#2e9e5b;--no:#d6453d;--ink:#1f2a3a}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--main);color:#fff;padding:16px;text-align:center}
+header h1{margin:0;font-size:1.5rem}
+#starBox{font-size:1.4rem;margin-top:6px;letter-spacing:2px}
+nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:12px}
+nav button{border:2px solid var(--main);background:#fff;color:var(--main);border-radius:20px;padding:8px 14px;font-size:.95rem;font-weight:700;cursor:pointer}
+nav button.on{background:var(--main);color:#fff}
+section{max-width:780px;margin:0 auto;padding:12px 16px 40px}
+h2{text-align:center;margin:8px 0}
+.guide{background:var(--soft);border-radius:12px;padding:10px 14px;margin:8px 0 16px;font-size:1.05rem}
+.guide small{display:block;color:#51637d}
+.row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 12px;margin:8px 0;flex-wrap:wrap}
+.row .num{font-weight:800;color:var(--main);width:24px}
+.row .txt{flex:1;min-width:200px;font-size:1.1rem}
+.row .mark{width:100%;font-size:.95rem;color:#51637d;padding-left:34px}
+.row .mark:empty{display:none}
+.tf{width:52px;height:42px;font-size:1.1rem;font-weight:800;border-radius:10px;border:2px solid #bbb;background:#fff;cursor:pointer;margin-left:4px}
+.right{border-color:var(--ok)!important;background:#dff5e8!important}
+.wrong{border-color:var(--no)!important;background:#fde2e0!important}
+.fb,.msg{min-height:1.6em;font-size:1.15rem;font-weight:700;margin:10px 0;text-align:center}
+.result{font-size:1.5rem;font-weight:800;margin:20px 0;text-align:center}
+.center{text-align:center}
+.big{font-size:1.1rem;padding:10px 22px;border-radius:12px;border:none;background:var(--main);color:#fff;cursor:pointer;font-weight:700;margin:6px}
+.small{font-size:.95rem;padding:6px 14px;border-radius:10px;border:2px solid var(--main);background:#fff;color:var(--main);cursor:pointer;margin:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:56px;padding:10px;border-radius:12px}
+#poolBox{background:#fff}
+#pickedBox{background:var(--soft);flex-direction:column;align-items:stretch}
+.chip{font-size:1.05rem;padding:10px 14px;border-radius:12px;border:2px solid var(--main);background:#fff;cursor:pointer;font-weight:700;text-align:left}
+.chip:disabled{opacity:.3;cursor:default}
+.chip .age{color:#c0662b;margin-left:6px}
+.ask{font-size:1.35rem;font-weight:700;margin:14px 0;text-align:center}
+.progress{text-align:center;color:#51637d;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:8px;max-width:520px;margin:10px auto}
+.opt{font-size:1.1rem;padding:12px;border-radius:12px;border:2px solid #ccc;background:#fff;cursor:pointer;text-align:left}
+.quote{font-style:italic}
+select{font-size:1.05rem;padding:6px;border-radius:8px;border:2px solid var(--main)}
+.hint{color:#51637d;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1>Charlie's Dreams · Reading Check 📖</h1>
+  <div>Pass each activity to get a star!</div>
+  <div id="starBox"></div>
+</header>
+
+<nav>
+  <button data-tab="tf" class="on">① True or False</button>
+  <button data-tab="order">② Dream Order</button>
+  <button data-tab="who">③ Who Said It?</button>
+  <button data-tab="match">④ Job & Thing</button>
+  <button data-tab="quiz">⑤ Reading Quiz</button>
+</nav>
+
+<section id="tf">
+  <h2>① True or False</h2>
+  <div class="guide">Read and choose T or F.<small>맞으면 T, 틀리면 F를 눌러요. 10문제 중 8개 이상 맞히면 별 ⭐</small></div>
+  <div id="tfBox"></div>
+  <div class="msg" id="tfMsg"></div>
+  <div class="center"><button class="small" onclick="buildTF()">↺ Try again</button></div>
+</section>
+
+<section id="order" hidden>
+  <h2>② Charlie's Dream Order</h2>
+  <div class="guide">Put Charlie's dream jobs in order.<small>Charlie가 원했던 직업을 처음부터 순서대로 눌러요. 잘못 눌렀으면 아래 칸에서 다시 누르면 빠져요. 모두 맞히면 별 ⭐</small></div>
+  <div class="center"><button class="small" id="ageBtn">💡 Show ages (나이 힌트 보기)</button></div>
+  <div class="chips" id="poolBox"></div>
+  <p class="hint">▼ My order</p>
+  <div class="chips" id="pickedBox"></div>
+  <div class="center"><button class="big" id="orderCheck">Check</button><button class="small" onclick="buildOrder()">↺ Reset</button></div>
+  <div class="msg" id="orderMsg"></div>
+</section>
+
+<section id="who" hidden>
+  <h2>③ Who Said It?</h2>
+  <div class="guide">Who said these words?<small>누가 한 말인지 골라요. 8문제 중 6개 이상 맞히면 별 ⭐</small></div>
+  <div id="whoBox"></div>
+</section>
+
+<section id="match" hidden>
+  <h2>④ Job & Thing</h2>
+  <div class="guide">What did Charlie get for each dream?<small>Charlie가 각 꿈을 위해 가지게 된 물건을 골라요. 모두 맞히면 별 ⭐</small></div>
+  <div id="matchBox"></div>
+  <div class="center"><button class="big" id="matchCheck">Check</button></div>
+  <div class="msg" id="matchMsg"></div>
+</section>
+
+<section id="quiz" hidden>
+  <h2>⑤ Reading Quiz</h2>
+  <div class="guide">Choose the best answer.<small>가장 알맞은 답을 골라요. 10문제 중 8개 이상 맞히면 별 ⭐</small></div>
+  <div id="quizBox"></div>
+</section>
+
+<script>
+const $ = s => document.querySelector(s);
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+
+/* 별 */
+const STAR_KEYS=['tf','order','who','match','quiz'];
+const stars={};
+function setStar(k,v){ if(v) stars[k]=true; renderStars(); }
+function renderStars(){
+  const n=STAR_KEYS.filter(k=>stars[k]).length;
+  $('#starBox').textContent='⭐'.repeat(n)+'☆'.repeat(5-n)+(n===5?'  Great job! 🎉':'');
+}
+
+/* 탭 */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('section').forEach(s=>s.hidden = s.id!==b.dataset.tab);
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on', x===b));
+});
+
+/* 공통 객관식 */
+function runMC(boxSel, list, key, pass){
+  const box=$(boxSel);
+  const items=shuffle(list);
+  let i=0, score=0;
+  function step(){
+    if(i>=items.length){
+      box.innerHTML=`<div class="result">${score} / ${items.length} ${score>=pass?'🎉 Great!':'💪 Try again!'}</div>
+                     <div class="center"><button class="big">↺ Try again</button></div>`;
+      box.querySelector('button').onclick=()=>runMC(boxSel,list,key,pass);
+      setStar(key, score>=pass);
+      return;
+    }
+    const q=items[i];
+    box.innerHTML=`<div class="progress">${i+1} / ${items.length}</div>
+      <div class="ask">${q.q}</div><div class="opts"></div><div class="fb"></div><div class="center nx"></div>`;
+    const od=box.querySelector('.opts'), fb=box.querySelector('.fb');
+    (q.fixed ? q.o : shuffle(q.o)).forEach(o=>{
+      const b=document.createElement('button');
+      b.className='opt'; b.textContent=o;
+      b.onclick=()=>{
+        od.querySelectorAll('button').forEach(x=>{ x.disabled=true; if(x.textContent===q.a) x.classList.add('right'); });
+        if(o===q.a){ score++; fb.textContent='Correct! 👍'+(q.e?' '+q.e:''); }
+        else { b.classList.add('wrong'); fb.textContent='Answer: '+q.a+(q.e?' — '+q.e:''); }
+        const nx=document.createElement('button');
+        nx.className='big'; nx.textContent=i===items.length-1?'See result ▶':'Next ▶';
+        nx.onclick=()=>{ i++; step(); };
+        box.querySelector('.nx').appendChild(nx);
+      };
+      od.appendChild(b);
+    });
+  }
+  step();
+}
+
+/* ① True or False */
+const TF=[
+  ["Charlie's grandpa gave him a guitar.", true, ""],
+  ["Uncle Jim wants to drive a train now.", false, "He loves trains, but he doesn't want to drive one."],
+  ["Charlie saw a farmer on the television.", true, ""],
+  ["Charlie watched a film about a zoo keeper at home.", false, "He watched it at school."],
+  ["The vet in the film flew in a helicopter.", true, ""],
+  ["Charlie helped a real lion.", false, "It was the cat from the house opposite."],
+  ["Mum said it takes many years to be a doctor.", true, ""],
+  ["Billy filmed Charlie.", false, "Dad filmed Charlie."],
+  ["Charlie was surprised when he watched Dad's film.", true, ""],
+  ["At the end, Charlie wants to be a doctor.", false, "He wants to make films."]
+];
+function buildTF(){
+  const box=$('#tfBox'); box.innerHTML='';
+  $('#tfMsg').textContent='';
+  let answered=0, score=0;
+  TF.forEach(([s,a,fix],i)=>{
+    const row=document.createElement('div');
+    row.className='row';
+    row.innerHTML=`<span class="num">${i+1}</span><span class="txt">${s}</span>
+      <span><button class="tf">T</button><button class="tf">F</button></span><span class="mark"></span>`;
+    const [bt,bf]=row.querySelectorAll('.tf');
+    [bt,bf].forEach(b=>b.onclick=()=>{
+      const pick = b.textContent==='T';
+      bt.disabled=bf.disabled=true;
+      const ok = pick===a;
+      b.classList.add(ok?'right':'wrong');
+      if(!ok) (a?bt:bf).classList.add('right');
+      row.querySelector('.mark').textContent = (ok?'⭕ ':'❌ ') + (fix?'→ '+fix:'');
+      answered++; if(ok) score++;
+      if(answered===TF.length){
+        $('#tfMsg').textContent=`${score} / ${TF.length} ${score>=8?'🎉 Great!':'💪 Try again!'}`;
+        setStar('tf', score>=8);
+      }
+    });
+    box.appendChild(row);
+  });
+}
+
+/* ② Dream Order */
+const DREAMS=[
+  {job:'be in a band', pic:'🎸', age:'7'},
+  {job:'train driver', pic:'🚂', age:'7½'},
+  {job:'farmer', pic:'🚜', age:'after 7½'},
+  {job:'zoo keeper', pic:'🐊', age:'almost 8'},
+  {job:'vet', pic:'🦁', age:'8'},
+  {job:'doctor', pic:'🩺', age:'8½'},
+  {job:'baseball player', pic:'⚾', age:'9'},
+  {job:'film maker', pic:'🎥', age:'today'}
+];
+let picked=[], showAge=false;
+function buildOrder(){
+  picked=[];
+  const pool=$('#poolBox'); pool.innerHTML='';
+  shuffle(DREAMS).forEach(d=>{
+    const b=document.createElement('button');
+    b.className='chip'; b.dataset.job=d.job;
+    b.innerHTML=`${d.pic} ${d.job}<span class="age"${showAge?'':' hidden'}>(${d.age})</span>`;
+    b.onclick=()=>{ picked.push(d.job); b.disabled=true; drawPicked(); };
+    pool.appendChild(b);
+  });
+  drawPicked();
+  $('#orderMsg').textContent='';
+}
+function drawPicked(){
+  const box=$('#pickedBox');
+  if(!picked.length){ box.innerHTML='<span class="hint">Tap the jobs above in order.</span>'; return; }
+  box.innerHTML='';
+  picked.forEach((j,i)=>{
+    const d=DREAMS.find(x=>x.job===j);
+    const b=document.createElement('button');
+    b.className='chip';
+    b.textContent=`${i+1}. ${d.pic} ${j}`;
+    b.onclick=()=>{
+      picked.splice(i,1);
+      [...$('#poolBox').children].forEach(c=>{ if(c.dataset.job===j) c.disabled=false; });
+      drawPicked();
+    };
+    box.appendChild(b);
+  });
+}
+$('#ageBtn').onclick=()=>{
+  showAge=!showAge;
+  document.querySelectorAll('#poolBox .age').forEach(s=>s.hidden=!showAge);
+  $('#ageBtn').textContent = showAge ? '🙈 Hide ages (나이 힌트 숨기기)' : '💡 Show ages (나이 힌트 보기)';
+};
+$('#orderCheck').onclick=()=>{
+  if(picked.length<DREAMS.length){ $('#orderMsg').textContent='Choose all 8 jobs first. (8개를 모두 골라요)'; return; }
+  let right=0;
+  [...$('#pickedBox').children].forEach((b,i)=>{
+    const ok = picked[i]===DREAMS[i].job;
+    b.classList.remove('right','wrong');
+    b.classList.add(ok?'right':'wrong');
+    if(ok) right++;
+  });
+  if(right===DREAMS.length){ $('#orderMsg').textContent='Perfect! 🎉'; setStar('order',true); }
+  else $('#orderMsg').textContent=`${right} / 8 in the right place. Tap the red ones to fix them.`;
+};
+
+/* ③ Who Said It? */
+const SPEAKERS=['Charlie','Billy','Mum','Dad','Uncle Jim','Teacher'];
+const WHO=[
+  {q:'<span class="quote">"Don\'t be silly, Charlie."</span>', a:'Billy'},
+  {q:'<span class="quote">"I love trains now. But I don\'t want to drive one!"</span>', a:'Uncle Jim'},
+  {q:'<span class="quote">"That\'s a good idea. You love animals."</span>', a:'Teacher'},
+  {q:'<span class="quote">"It takes many years of work to be a doctor."</span>', a:'Mum'},
+  {q:'<span class="quote">"Come and watch this film, Charlie."</span>', a:'Dad'},
+  {q:'<span class="quote">"I thought it was a lion."</span>', a:'Charlie'},
+  {q:'<span class="quote">"That\'s not a big animal!"</span>', a:'Billy'},
+  {q:'<span class="quote">"It\'s his film of Charlie\'s dreams."</span>', a:'Mum'}
+].map(x=>({...x, o:SPEAKERS, fixed:true}));
+
+/* ④ Job & Thing */
+const THINGS=[
+  {job:'🎸 be in a band', thing:'a guitar from Grandpa'},
+  {job:'🚂 train driver', thing:'a toy train'},
+  {job:'🚜 farmer', thing:'farm toys'},
+  {job:'🩺 doctor', thing:"a doctor's bag"},
+  {job:'⚾ baseball player', thing:'a bat and ball'},
+  {job:'🎥 film maker', thing:'a camera'}
+];
+function buildMatch(){
+  const box=$('#matchBox'); box.innerHTML='';
+  $('#matchMsg').textContent='';
+  const opts=shuffle(THINGS.map(t=>t.thing));
+  THINGS.forEach((t,i)=>{
+    const row=document.createElement('div');
+    row.className='row';
+    row.innerHTML=`<span class="num">${i+1}</span><span class="txt">${t.job}</span>
+      <select><option value="">— choose —</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    box.appendChild(row);
+  });
+}
+$('#matchCheck').onclick=()=>{
+  let right=0;
+  [...$('#matchBox').children].forEach((row,i)=>{
+    const sel=row.querySelector('select');
+    const ok = sel.value===THINGS[i].thing;
+    sel.classList.remove('right','wrong');
+    sel.classList.add(ok?'right':'wrong');
+    if(ok) right++;
+  });
+  if(right===THINGS.length){ $('#matchMsg').textContent='All correct! 🎉'; setStar('match',true); }
+  else $('#matchMsg').textContent=`${right} / ${THINGS.length}. Fix the red ones and check again.`;
+};
+
+/* ⑤ Reading Quiz */
+const QUIZ=[
+  {q:'Where did Charlie see the film about a famous band?', a:'at the cinema', o:['at the cinema','at school','at Grandpa\'s house','on the internet']},
+  {q:'Who watched a film about steam trains with Charlie?', a:'Uncle Jim', o:['Uncle Jim','Billy','Dad','his teacher']},
+  {q:'What did the farmer on TV drive?', a:'a big yellow machine', o:['a big yellow machine','a red train','a helicopter','a white car']},
+  {q:'What animal did the zoo keeper give food to?', a:'a crocodile', o:['a crocodile','a lion','an elephant','a cat']},
+  {q:'Why did the vet fly in a helicopter?', a:'to help big animals', o:['to help big animals','to go to the cinema','to film a band','to visit a farm']},
+  {q:'Why was Charlie wearing a white coat in Dad\'s film?', a:'He wanted to be a doctor.', o:['He wanted to be a doctor.','He wanted to be a farmer.','It was cold.','He was a baseball player.']},
+  {q:'What did Dad\'s film show?', a:'all the jobs Charlie wanted to do', o:['all the jobs Charlie wanted to do','a famous baseball game','Uncle Jim\'s trains','a big crocodile']},
+  {q:'How did Charlie learn about each job?', a:'He read books and watched films about it.', o:['He read books and watched films about it.','He worked at each job.','Billy told him everything.','He didn\'t learn about the jobs.']},
+  {q:'What does Charlie do today?', a:'He makes films.', o:['He makes films.','He drives a train.','He is a doctor.','He plays in a band.']},
+  {q:'Why does Charlie know a lot about many jobs?', a:'He learned about them and now he films them.', o:['He learned about them and now he films them.','He did all the jobs.','His brother taught him.','He read one book.'], e:'Every dream helped him in his real job!'}
+];
+
+/* 시작 */
+buildTF(); buildOrder(); buildMatch();
+runMC('#whoBox', WHO, 'who', 6);
+runMC('#quizBox', QUIZ, 'quiz', 8);
+renderStars();
+</script>
+</body>
+</html>

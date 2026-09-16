@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>집단 1 · Charlie의 직업 단어</title>
+<style>
+:root{--bg:#fff8ef;--main:#e8793a;--soft:#ffe3cf;--ok:#2e9e5b;--no:#d6453d;--ink:#3a2a1f}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--main);color:#fff;padding:16px;text-align:center}
+header h1{margin:0;font-size:1.6rem}
+#starBox{font-size:1.5rem;margin-top:6px;letter-spacing:2px}
+nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:12px}
+nav button{border:2px solid var(--main);background:#fff;color:var(--main);border-radius:20px;padding:8px 14px;font-size:1rem;font-weight:700;cursor:pointer}
+nav button.on{background:var(--main);color:#fff}
+section{max-width:760px;margin:0 auto;padding:12px 16px 40px;text-align:center}
+h2{margin:8px 0}
+.guide{background:var(--soft);border-radius:12px;padding:10px;margin:8px 0 16px;font-size:1.1rem}
+.pic{font-size:3.5rem;line-height:1.2}
+.en{font-size:2rem;font-weight:800;letter-spacing:1px}
+.ko{font-size:1.6rem;font-weight:700}
+.ask{font-size:2.2rem;font-weight:800;margin:10px 0}
+.hint{color:#8a6d5a}
+.progress{color:#8a6d5a;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.flip{background:#fff;border:3px solid var(--main);border-radius:16px;min-height:170px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.flip .face{display:flex;flex-direction:column;align-items:center;gap:6px}
+.flip .back{display:none}
+.flip.turned{background:var(--soft)}
+.flip.turned .front{display:none}
+.flip.turned .back{display:flex}
+.opts{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:10px auto}
+.opt{font-size:1.5rem;padding:14px;border-radius:14px;border:3px solid #ddd;background:#fff;cursor:pointer;font-weight:700}
+.opt.right{border-color:var(--ok);background:#dff5e8}
+.opt.wrong{border-color:var(--no);background:#fde2e0}
+.fb{min-height:1.8em;font-size:1.3rem;font-weight:700;margin:8px 0}
+.result{font-size:1.6rem;font-weight:800;margin:20px 0}
+.big{font-size:1.2rem;padding:10px 22px;border-radius:14px;border:none;background:var(--main);color:#fff;cursor:pointer;font-weight:700;margin:6px}
+.small{font-size:1rem;padding:6px 14px;border-radius:10px;border:2px solid var(--main);background:#fff;color:var(--main);cursor:pointer;margin:6px}
+.sp{font-size:1.4rem;border:none;background:none;cursor:pointer;vertical-align:middle}
+.mem-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.mem{min-height:100px;font-size:1.2rem;font-weight:800;border-radius:12px;border:3px solid var(--main);background:var(--main);color:#fff;cursor:pointer}
+.mem.open{background:#fff;color:var(--ink)}
+.mem.done{background:#dff5e8;border-color:var(--ok);color:var(--ink)}
+.slots{margin:14px 0}
+.slot{display:inline-block;min-width:48px;padding:6px 4px;margin:3px;font-size:2.2rem;font-weight:800;border-bottom:4px solid #ccc}
+.slot.blank{color:var(--main);border-bottom-color:var(--main)}
+.letters{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:10px 0}
+.tile{width:60px;height:60px;font-size:2rem;font-weight:800;border-radius:12px;border:3px solid var(--main);background:#fff;cursor:pointer}
+.tile:disabled{opacity:.3;cursor:default}
+.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+input.type{font-size:2rem;padding:8px;width:240px;text-align:center;border:3px solid var(--main);border-radius:12px}
+@media (max-width:520px){.mem-grid{grid-template-columns:repeat(3,1fr)}.tile{width:50px;height:50px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Charlie의 직업 단어 🎬</h1>
+  <div>활동을 통과하면 별을 받아요!</div>
+  <div id="starBox"></div>
+</header>
+
+<nav>
+  <button data-tab="cards" class="on">① 단어 카드</button>
+  <button data-tab="quiz">② 뜻 고르기</button>
+  <button data-tab="memory">③ 짝 맞추기</button>
+  <button data-tab="blank">④ 빈칸 글자</button>
+  <button data-tab="order">⑤ 글자 순서</button>
+  <button data-tab="write">⑥ 듣고 쓰기</button>
+</nav>
+
+<section id="cards">
+  <h2>① 단어 카드</h2>
+  <div class="guide">카드를 누르면 뜻이 나오고 소리가 들려요. 5개를 모두 눌러 보세요.</div>
+  <div class="cards" id="cardBox"></div>
+</section>
+
+<section id="quiz" hidden>
+  <h2>② 뜻 고르기</h2>
+  <div class="guide">알맞은 것을 골라요. 10문제 중 8개 이상 맞히면 별 ⭐</div>
+  <div id="quizBox"></div>
+</section>
+
+<section id="memory" hidden>
+  <h2>③ 짝 맞추기</h2>
+  <div class="guide">카드 2장을 뒤집어 영어 단어와 뜻을 짝지어요. 모두 찾으면 별 ⭐</div>
+  <div class="mem-grid" id="memBox"></div>
+  <div class="fb" id="memMsg"></div>
+  <button class="small" onclick="startMemory()">↺ 새로 섞기</button>
+</section>
+
+<section id="blank" hidden>
+  <h2>④ 빈칸 글자 채우기</h2>
+  <div class="guide">빈칸에 들어갈 글자를 눌러요. 5개 중 4개를 한 번에 맞히면 별 ⭐</div>
+  <div id="blankBox"></div>
+</section>
+
+<section id="order" hidden>
+  <h2>⑤ 글자 순서 맞추기</h2>
+  <div class="guide">글자를 순서대로 눌러 단어를 만들어요. 5개 중 4개를 한 번에 맞히면 별 ⭐</div>
+  <div id="orderBox"></div>
+</section>
+
+<section id="write" hidden>
+  <h2>⑥ 듣고 쓰기</h2>
+  <div class="guide">🔊를 누르고 들은 단어를 써요. 힌트를 쓰지 않고 3개 이상 맞히면 별 ⭐</div>
+  <div id="writeBox"></div>
+</section>
+
+<script>
+const WORDS = [
+  {en:'farmer', ko:'농부',   pic:'👨‍🌾'},
+  {en:'famous', ko:'유명한', pic:'🌟'},
+  {en:'vet',    ko:'수의사', pic:'🐶🩺'},
+  {en:'driver', ko:'운전사', pic:'🚗'},
+  {en:'guitar', ko:'기타',   pic:'🎸'}
+];
+
+const $ = s => document.querySelector(s);
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a; };
+function speak(t){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang='en-US'; u.rate=0.75;
+  speechSynthesis.speak(u);
+}
+
+/* 별 */
+const STAR_KEYS=['quiz','memory','blank','order','write'];
+const stars={};
+function setStar(k,v){ if(v) stars[k]=true; renderStars(); }
+function renderStars(){
+  const n=STAR_KEYS.filter(k=>stars[k]).length;
+  $('#starBox').textContent='⭐'.repeat(n)+'☆'.repeat(5-n)+(n===5?'  모두 성공! 🎉':'');
+}
+
+/* 탭 */
+function showTab(id){
+  document.querySelectorAll('section').forEach(s=>s.hidden = s.id!==id);
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===id));
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+/* ① 단어 카드 */
+function buildCards(){
+  const box=$('#cardBox'); box.innerHTML='';
+  WORDS.forEach(w=>{
+    const c=document.createElement('div');
+    c.className='flip';
+    c.innerHTML=`<div class="face front"><div class="pic">${w.pic}</div><div class="en">${w.en}</div></div>
+                 <div class="face back"><div class="en">${w.en}</div><div class="ko">${w.ko}</div></div>`;
+    c.onclick=()=>{ c.classList.toggle('turned'); speak(w.en); };
+    box.appendChild(c);
+  });
+}
+
+/* ② 뜻 고르기 */
+let qList=[], qi=0, qScore=0;
+function startQuiz(){
+  qList = shuffle(WORDS.flatMap(w=>[{w,type:'e2k'},{w,type:'k2e'}]));
+  qi=0; qScore=0; nextQ();
+}
+function nextQ(){
+  const box=$('#quizBox');
+  if(qi>=qList.length){
+    box.innerHTML=`<div class="result">10문제 중 ${qScore}개 맞았어요! ${qScore>=8?'🎉':'💪 한 번 더 해 봐요'}</div>
+                   <button class="big" onclick="startQuiz()">다시 하기</button>`;
+    setStar('quiz', qScore>=8);
+    return;
+  }
+  const {w,type}=qList[qi];
+  const opts=shuffle([w, ...shuffle(WORDS.filter(x=>x!==w)).slice(0,2)]);
+  const askHtml = type==='e2k'
+    ? `${w.en} <button class="sp" onclick="speak('${w.en}')">🔊</button>`
+    : w.ko;
+  box.innerHTML=`<div class="progress">${qi+1} / ${qList.length}</div>
+    <div class="ask">${askHtml}</div>
+    <p class="hint">${type==='e2k'?'뜻을 골라요':'영어 단어를 골라요'}</p>
+    <div class="opts"></div><div class="fb"></div>`;
+  if(type==='e2k') speak(w.en);
+  const od=box.querySelector('.opts'), fb=box.querySelector('.fb');
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.textContent = type==='e2k' ? o.ko : o.en;
+    b.onclick=()=>{
+      od.querySelectorAll('button').forEach(x=>x.disabled=true);
+      if(o===w){ b.classList.add('right'); qScore++; fb.textContent='정답! 👍'; }
+      else{
+        b.classList.add('wrong');
+        [...od.children].forEach(x=>{ if(x.textContent===(type==='e2k'?w.ko:w.en)) x.classList.add('right'); });
+        fb.textContent=`정답: ${w.en} = ${w.ko}`;
+      }
+      speak(w.en);
+      setTimeout(()=>{ qi++; nextQ(); }, 1600);
+    };
+    od.appendChild(b);
+  });
+}
+
+/* ③ 짝 맞추기 */
+let flipped=[], matched=0, lock=false;
+function startMemory(){
+  const box=$('#memBox'); box.innerHTML='';
+  flipped=[]; matched=0; lock=false; $('#memMsg').textContent='';
+  const cards=shuffle(WORDS.flatMap(w=>[{id:w.en,show:w.en},{id:w.en,show:`${w.pic}<br>${w.ko}`}]));
+  cards.forEach(c=>{
+    const d=document.createElement('button');
+    d.className='mem'; d.innerHTML='❓';
+    d.onclick=()=>{
+      if(lock || d.classList.contains('open')) return;
+      d.classList.add('open'); d.innerHTML=c.show;
+      flipped.push({d,c});
+      if(flipped.length===2){
+        lock=true;
+        const [a,b]=flipped;
+        if(a.c.id===b.c.id){
+          a.d.classList.add('done'); b.d.classList.add('done');
+          speak(a.c.id); matched++; flipped=[]; lock=false;
+          if(matched===WORDS.length){ $('#memMsg').textContent='다 찾았어요! 🎉'; setStar('memory',true); }
+        } else {
+          setTimeout(()=>{
+            [a,b].forEach(x=>{ x.d.classList.remove('open'); x.d.innerHTML='❓'; });
+            flipped=[]; lock=false;
+          },900);
+        }
+      }
+    };
+    box.appendChild(d);
+  });
+}
+
+/* ④ 빈칸 글자 */
+const BLANKS={farmer:[2,4], famous:[2,4], vet:[1], driver:[2,4], guitar:[1,4]};
+let bOrder=[], bi=0, bScore=0, bFill=[], bMiss=false;
+function startBlank(){ bOrder=shuffle(WORDS); bi=0; bScore=0; nextBlank(); }
+function drawSlots(w,pos){
+  $('#blankBox .slots').innerHTML = w.en.split('').map((ch,i)=>{
+    if(pos.includes(i)){ const f=bFill[pos.indexOf(i)]; return `<span class="slot blank">${f||'_'}</span>`; }
+    return `<span class="slot">${ch}</span>`;
+  }).join('');
+}
+function nextBlank(){
+  const box=$('#blankBox');
+  if(bi>=bOrder.length){
+    box.innerHTML=`<div class="result">5개 중 ${bScore}개를 한 번에 맞혔어요! ${bScore>=4?'🎉':'💪'}</div>
+                   <button class="big" onclick="startBlank()">다시 하기</button>`;
+    setStar('blank', bScore>=4);
+    return;
+  }
+  const w=bOrder[bi], pos=BLANKS[w.en];
+  bFill=[]; bMiss=false;
+  const need=pos.map(p=>w.en[p]);
+  const extra=shuffle('abcdefghilmnorstuv'.split('').filter(l=>!need.includes(l))).slice(0,3);
+  const letters=shuffle([...need,...extra]);
+  box.innerHTML=`<div class="progress">${bi+1} / 5</div>
+    <div class="pic">${w.pic}</div>
+    <div class="ko">${w.ko} <button class="sp" onclick="speak('${w.en}')">🔊</button></div>
+    <div class="slots"></div>
+    <p class="hint">빈칸에 들어갈 글자를 앞에서부터 순서대로 눌러요</p>
+    <div class="letters"></div><div class="fb"></div>`;
+  drawSlots(w,pos);
+  const ld=box.querySelector('.letters'), fb=box.querySelector('.fb');
+  letters.forEach(l=>{
+    const b=document.createElement('button');
+    b.className='tile'; b.textContent=l;
+    b.onclick=()=>{
+      if(l===need[bFill.length]){
+        bFill.push(l); b.disabled=true; drawSlots(w,pos); fb.textContent='';
+        if(bFill.length===need.length){
+          fb.textContent='잘했어요! 👍 '+w.en; speak(w.en);
+          if(!bMiss) bScore++;
+          ld.querySelectorAll('button').forEach(x=>x.disabled=true);
+          setTimeout(()=>{ bi++; nextBlank(); },1600);
+        }
+      } else {
+        bMiss=true; b.classList.add('shake'); fb.textContent='다시 생각해 봐요 🤔';
+        setTimeout(()=>b.classList.remove('shake'),400);
+      }
+    };
+    ld.appendChild(b);
+  });
+}
+
+/* ⑤ 글자 순서 */
+let oOrder=[], oi=0, oScore=0, oAns='', oMiss=false;
+function startOrder(){ oOrder=shuffle(WORDS); oi=0; oScore=0; nextOrder(); }
+function nextOrder(){
+  const box=$('#orderBox');
+  if(oi>=oOrder.length){
+    box.innerHTML=`<div class="result">5개 중 ${oScore}개를 한 번에 맞혔어요! ${oScore>=4?'🎉':'💪'}</div>
+                   <button class="big" onclick="startOrder()">다시 하기</button>`;
+    setStar('order', oScore>=4);
+    return;
+  }
+  const w=oOrder[oi];
+  oAns=''; oMiss=false;
+  let sh; do{ sh=shuffle(w.en.split('')); } while(sh.join('')===w.en);
+  box.innerHTML=`<div class="progress">${oi+1} / 5</div>
+    <div class="pic">${w.pic}</div>
+    <div class="ko">${w.ko} <button class="sp" onclick="speak('${w.en}')">🔊</button></div>
+    <div class="slots answer"></div>
+    <div class="letters"></div>
+    <button class="small" id="oReset">↺ 지우고 다시</button>
+    <div class="fb"></div>`;
+  const ans=box.querySelector('.answer'), ld=box.querySelector('.letters'), fb=box.querySelector('.fb');
+  const draw=()=>ans.innerHTML=w.en.split('').map((_,i)=>`<span class="slot ${oAns[i]?'':'blank'}">${oAns[i]||'_'}</span>`).join('');
+  draw();
+  sh.forEach(l=>{
+    const b=document.createElement('button');
+    b.className='tile'; b.textContent=l;
+    b.onclick=()=>{
+      oAns+=l; b.disabled=true; draw();
+      if(oAns.length===w.en.length){
+        if(oAns===w.en){
+          fb.textContent='정답! 👍 '+w.en; speak(w.en);
+          if(!oMiss) oScore++;
+          $('#oReset').disabled=true;
+          setTimeout(()=>{ oi++; nextOrder(); },1600);
+        } else {
+          oMiss=true; fb.textContent='순서가 달라요. "지우고 다시"를 눌러요 🤔';
+        }
+      }
+    };
+    ld.appendChild(b);
+  });
+  $('#oReset').onclick=()=>{
+    oAns=''; ld.querySelectorAll('button').forEach(x=>x.disabled=false); draw(); fb.textContent='';
+  };
+}
+
+/* ⑥ 듣고 쓰기 */
+let wOrder=[], wi=0, wScore=0, wTry=0, wHint=0;
+function startWrite(){ wOrder=shuffle(WORDS); wi=0; wScore=0; nextWrite(); }
+function nextWrite(){
+  const box=$('#writeBox');
+  if(wi>=wOrder.length){
+    box.innerHTML=`<div class="result">5개 중 ${wScore}개를 혼자 힘으로 썼어요! ${wScore>=3?'🎉':'💪'}</div>
+                   <button class="big" onclick="startWrite()">다시 하기</button>`;
+    setStar('write', wScore>=3);
+    return;
+  }
+  const w=wOrder[wi];
+  wTry=0; wHint=0;
+  box.innerHTML=`<div class="progress">${wi+1} / 5</div>
+    <div class="pic">${w.pic}</div>
+    <div class="ko">${w.ko} <button class="sp" id="wSp">🔊</button></div>
+    <p><input class="type" id="wIn" autocomplete="off" autocapitalize="off" spellcheck="false"></p>
+    <button class="big" id="wOk">확인</button>
+    <button class="small" id="wHint">💡 힌트</button>
+    <div class="fb"></div>`;
+  const inp=$('#wIn'), fb=box.querySelector('.fb');
+  $('#wSp').onclick=()=>speak(w.en);
+  speak(w.en);
+  inp.focus();
+  $('#wHint').onclick=()=>{
+    if(wHint<w.en.length-1) wHint++;
+    fb.textContent=`힌트: ${w.en.slice(0,wHint)}${'_ '.repeat(w.en.length-wHint)}`;
+  };
+  const check=()=>{
+    const v=inp.value.trim().toLowerCase();
+    if(!v) return;
+    if(v===w.en){
+      fb.textContent='정답! 👍'; speak(w.en);
+      if(wTry===0 && wHint===0) wScore++;
+      $('#wOk').disabled=true; $('#wHint').disabled=true;
+      setTimeout(()=>{ wi++; nextWrite(); },1500);
+    } else {
+      wTry++;
+      if(wTry>=2){
+        fb.innerHTML=`정답은 <b>${w.en}</b> 이에요. 보고 따라 써 봐요.`;
+      } else {
+        fb.textContent='조금 달라요. 다시 들어 보고 써 봐요 🤔';
+      }
+      inp.select();
+    }
+  };
+  $('#wOk').onclick=check;
+  inp.onkeydown=e=>{ if(e.key==='Enter') check(); };
+}
+
+/* 시작 */
+buildCards(); startQuiz(); startMemory(); startBlank(); startOrder(); startWrite(); renderStars();
+</script>
+</body>
+</html>
